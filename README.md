@@ -13,18 +13,20 @@ A 4 KB Python chess engine for the make.fun tiny-chess-01 bounty.
 
 ## Format
 
-`main.py` is an lzma-compressed payload stored as a latin-1 string literal
-(with null/CR bytes escaped). The rules allow a compressed payload + unpacker,
-counted toward the 4,096-byte cap. The readable source is `golf4.py`
-(kept out of the submitted repo; see BUILD_LOG.md in the build workspace).
+`main.py` is a zlib-compressed payload stored as an ASCII base85 string
+literal, unpacked by a two-line loader (`import zlib as z,base64 as b` /
+`exec(z.decompress(b.b85decode('...')))`). The rules allow a compressed
+payload + unpacker, counted toward the 4,096-byte cap. Base85 (not latin-1)
+keeps the file strict UTF-8 so the transcript gate can attribute its lines.
+The readable source is `golf6.py` (kept out of the submitted repo; see
+BUILD_LOG.md in the build workspace).
 
-## Results (local practice trials, kit env)
+## Results (local practice trials, kit env — base85 build)
 
 | Trial | Elo | W/D/L | Wall |
 |---|---|---|---|
-| 0 | 1,464 | 3/3/2 | 955 s |
-| 1 | 1,253 | 2/2/4 | 1,486 s |
-| 2 | 1,326 | 3/1/4 | 1,237 s |
+| 0 | 1,464 | 3/3/2 | 1,159 s |
+| 1 | 1,326 | 3/1/4 | 1,658 s |
+| 2 | 1,326 | 3/1/4 | 1,099 s |
 
-Mean Elo **1,348** — above the sunfish 4K baseline (~1,325) and the 1,154 entry floor.
-Perft 16/16 on the 5 standard positions. No model calls, stdlib only.
+Mean Elo **1,372** — exactly the v6 mean, above the sunfish 4K baseline (~1,325) and the 1,154 entry floor. (The latin-1 build's mean was 1,348; base85 trial 1 recovered the time-loss game.) Trial 1's 1,658 s wall is the closest to the 1,800 s limit — a watch item, but no move timed out. Perft 16/16 on the 5 standard positions. Determinism verified: two bench runs byte-identical (best moves + node counts). No model calls, stdlib only.
